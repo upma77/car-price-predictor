@@ -1,0 +1,36 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+ENV/
+.venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Flask & deployment stuff
+instance/
+*.log
+
+# Ignore large ML models (optional)
+*.pkl
+*.h5
+*.joblib
+
+# Environment files
+.env
+*.env
+
+# VS Code settings
+.vscode/
+
+# PyCharm settings
+.idea/

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Car Price Predictor</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #141E30, #243B55);
+            font-family: 'Poppins', sans-serif;
+            color: white;
+        }
+        .card {
+            margin-top: 40px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: none;
+            padding: 20px;
+        }
+        label {
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: #007bff;
+            border-radius: 30px;
+            font-size: 18px;
+            padding: 10px;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        select, input {
+            border-radius: 10px !important;
+        }
+        #prediction {
+            font-size: 25px;
+            font-weight: bold;
+            color: #00ffae;
+        }
+        h1 {
+            font-weight: 600;
+        }
+        .loader {
+            display: none;
+            margin: auto;
+            margin-top: 10px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <h1 class="text-center mb-4">🚗 Car Price Predictor</h1>
+        <p class="text-center">Fill the details below and get an instant selling price estimation!</p>
+
+        <form id="carForm" method="post">
+            <!-- Company -->
+            <div class="form-group">
+                <label>Select the Company:</label>
+                <select class="form-control" id="company" name="company" onchange="loadModels()" required>
+                    <option disabled selected>Choose a company</option>
+                    {% for c in companies %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Model -->
+            <div class="form-group">
+                <label>Select the Model:</label>
+                <select class="form-control" id="car_models" name="car_models" required></select>
+            </div>
+
+            <!-- Year -->
+            <div class="form-group">
+                <label>Select Year of Purchase:</label>
+                <select class="form-control" id="year" name="year" required>
+                    {% for y in years %}
+                    <option value="{{ y }}">{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Fuel -->
+            <div class="form-group">
+                <label>Select Fuel Type:</label>
+                <select class="form-control" id="fuel_type" name="fuel_type" required>
+                    {% for f in fuel_types %}
+                    <option value="{{ f }}">{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Kilometres -->
+            <div class="form-group">
+                <label>Enter Kilometres Driven:</label>
+                <input type="number" class="form-control" id="kilo_driven" name="kilo_driven"
+                       placeholder="e.g., 50000" required>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-block" onclick="sendData()">Predict Price</button>
+
+            <div class="loader" id="loader"></div>
+        </form>
+
+        <h3 class="text-center mt-4">
+            <span id="prediction"></span>
+        </h3>
+    </div>
+</div>
+
+<script>
+    // Load models based on selected company
+    function loadModels() {
+        let company = document.getElementById("company").value;
+        let modelDropdown = document.getElementById("car_models");
+        modelDropdown.innerHTML = "";
+
+        {% for c in companies %}
+        if (company === "{{ c }}") {
+            {% for m in car_models %}
+            {% if c in m %}
+            modelDropdown.innerHTML += `<option value="{{ m }}">{{ m }}</option>`;
+            {% endif %}
+            {% endfor %}
+        }
+        {% endfor %}
+    }
+
+    // Prevent default form submission
+    function submitHandler(e) {
+        e.preventDefault();
+    }
+
+    // Send data via AJAX
+    function sendData() {
+        document.querySelector("form").addEventListener("submit", submitHandler);
+
+        let loader = document.getElementById("loader");
+        loader.style.display = "block";
+
+        let fd = new FormData(document.querySelector("form"));
+        let xhr = new XMLHttpRequest();
+
+        xhr.open("POST", "/predict", true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                loader.style.display = "none";
+                document.getElementById("prediction").innerHTML = "Predicted Price: ₹ " + xhr.responseText;
+            }
+        };
+
+        xhr.send(fd);
+    }
+</script>
+
+</body>
+</html>
